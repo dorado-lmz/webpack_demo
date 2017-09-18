@@ -1,4 +1,4 @@
-# webpack3.0学习demo #
+# webpack3.0学习 #
 
 ## webpack是什么 ##
 
@@ -51,4 +51,52 @@ webpack可以看做是模块打包机：它做的事情是，分析你的项目�
 
 现在(2017/09/17)最新的版本是webpack@3.6.0
 
+## 建立基本项目结构 ##
 
+在根目录建立两个文件夹，分别是src和dist:
+
++ src文件夹：源代码，用于开发环境；
++ dist文件夹：打包好的文件夹，用于生产环境；
+
+## 编写程序文件 ##
+
+在dist文件夹创建一个index.html文件，并编写下面代码.
+
+/dist/index.html
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>webpack</title>
+    </head>
+    <body>
+        <div id="title"></div>
+        <script src="./bundle.js"></script>
+    </body>
+    </html>
+
+在src文件夹创建entery.js文件，用于编写javascript代码，也是入口文件；
+
+/src/entery.js
+
+    window.onload = function(){
+        document.getElementById('title').innerHTML = "Hello Webpack!";
+    }
+
+## webpack命令行打包 ##
+
+webpack命令行使用基本方法：
+
+    webpack {entry file} {destination for bundled file}
+
++ {entry file}:入口文件的路径，即将要打包的文件
++ {destination for bundled file}:打包后存放的路径
+
+    webpack src/entery.js dist/bundle.js
+
+执行上面的命令，这样就会在dist文件夹里自动生成一个bundle.js 文件，这样就打包完毕；
+
+<img src="/img/1.png">
