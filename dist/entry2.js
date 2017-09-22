@@ -60,17 +60,18 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */,
-/* 1 */
+/******/ ({
+
+/***/ 6:
 /***/ (function(module, exports) {
 
 document.getElementById('title').onclick = function(){
-    document.getElementById('title').style="color:red";
+    document.getElementById('title').style="color:green";
 }
 
 /***/ })
-/******/ ]);
+
+/******/ });

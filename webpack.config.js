@@ -13,7 +13,14 @@ module.exports = {
         filename: '[name].js'
     },
     //模块，主要是解读css和图片转换压缩等功能
-    module: {},
+    module: {
+        rules:[
+            {
+                test:/\.css$/,
+                use:['style-loader','css-loader']
+            }
+        ]
+    },
     //配置插件，用于生产模块和各项功能
     plugins: [],
     //配置webpack开发服务功能
