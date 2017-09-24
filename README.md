@@ -263,3 +263,20 @@ Loader的配置模型：
     }
 
 这样我们就配置好了，使用命令webpack打包，就可以看的样式生效；
+
+## js压缩 ##
+
+webpack自带一个插件uglifyjs-webpack-plugin来压缩js，所以不需要再次安装，当一切都准备妥当，引入uglifyjs-webpack-plugin模块：
+
+    const uglify = require('uglifyjs-webpack-plugin');
+
+因为它是一个插件，所以把它放在plugins里：
+
+    plugins:[
+        new uglify()
+    ]
+
+这样就完事了，执行命令webpack，压缩文件就OK了，一般不会出现问题，（但是我在实际操作中报错了，uglifyjs-webpack-plugin没有找到，所以，如果你报错了，还是安装一下吧）
+
+    npm install uglifyjs-webpack-plugin --save-dev
+
