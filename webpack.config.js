@@ -1,5 +1,7 @@
 const path = require('path');
 
+const uglify = require('uglifyjs-webpack-plugin');
+
 module.exports = {
     //入口文件的配置项
     entry: {
@@ -14,15 +16,15 @@ module.exports = {
     },
     //模块，主要是解读css和图片转换压缩等功能
     module: {
-        rules:[
-            {
-                test:/\.css$/,
-                use:['style-loader','css-loader']
-            }
-        ]
+        rules: [{
+            test: /\.css$/,
+            use: ["style-loader", "css-loader"]
+        }]
     },
     //配置插件，用于生产模块和各项功能
-    plugins: [],
+    plugins: [
+        new uglify()
+    ],
     //配置webpack开发服务功能
     devServer: {
         //配置服务的基本路径
