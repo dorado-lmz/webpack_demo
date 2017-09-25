@@ -253,11 +253,42 @@ Loader的配置模型：
 
 配置loader：
 
+第一种方法：
+
     module:{
         rule:[
             {
                 test:/\.css$/,
                 use:['style-loader','css-loader']
+            }
+        ]
+    }
+
+第二种方法：
+
+    module:{
+        rules:[
+            {
+                test：/\.css$/,
+                loader:['style-loader','css-loader']
+            }
+        ]
+    }
+
+第三种方法:
+
+    module:{
+        rules:[
+            {
+                test:/\.css$/,
+                use:[
+                    {
+                        loader:'style-loader'
+                    },
+                    {
+                        loader:'css-loader'
+                    }
+                ]
             }
         ]
     }
@@ -280,3 +311,46 @@ webpack自带一个插件uglifyjs-webpack-plugin来压缩js，所以不需要再
 
     npm install uglifyjs-webpack-plugin --save-dev
 
+## 打包HTML文件 ##
+
+首先删除dist目录下的所有文件，然后在src文件下创建index.html文件，
+
+/src/index.html
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>webpack</title>
+    </head>
+    <body>
+        <div id="title"></div>
+    </body>
+    </html>
+
+配置webpack.config.js文件，安装html-webpack-plugin插件
+
+    npm install html-webpack-plugin --save-dev
+
+然后引入改插件：
+
+    const htmlPlugin =  require('html-webpack-plugin');
+
+在plugins下，加载htmlPlugin插件
+
+    plugins:[
+        new uglify(),
+        new htmlPlugin({
+            minify:{
+                removeAttributeQuotes:true
+            },
+            hash:true,
+            template:'./src/index.html'
+        })
+    ]
+
++ minify：是对html文件进行压缩， removeAttributeQuotes是去掉属性的双引号；
++ hash：为了开发中js有缓存效果，加入hash，可以有效避免js缓存；
++ template：需要打包的HTML模板路径和文件名称；
