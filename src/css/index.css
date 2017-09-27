@@ -3,3 +3,9 @@ body{
     color:white;
     font-size:30px;
 }
+
+#img{
+    background: url('../images/webpack.jpg');
+    width: 497px;
+    height: 270px;
+}

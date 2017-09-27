@@ -20,12 +20,20 @@ module.exports = {
         rules: [{
             test: /\.css$/,
             use: ["style-loader", "css-loader"]
+        },{
+            test:/\.(png|jpg|gif)/,
+            use:[{
+                loader:'url-loader',
+                options:{
+                    limit:500000
+                }
+            }]
         }]
     },
     //配置插件，用于生产模块和各项功能
     plugins: [
         //压缩js插件
-        new UglifyJsPlugin(),
+        // new UglifyJsPlugin(),
         //打包html文件
         new HtmlPlugin({
             minify:{ //压缩html
