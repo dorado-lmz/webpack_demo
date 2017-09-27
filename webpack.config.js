@@ -2,6 +2,11 @@ const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+const website = {
+    publicPath:'http://localhost:1608/'
+}
 
 module.exports = {
     //入口文件的配置项
@@ -14,35 +19,41 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         // filename:'bundle.js'
         filename: '[name].js'
+        // public
     },
     //模块，主要是解读css和图片转换压缩等功能
     module: {
-        rules: [{
-            test: /\.css$/,
-            use: ["style-loader", "css-loader"]
-        },{
-            test:/\.(png|jpg|gif)/,
-            use:[{
-                loader:'url-loader',
-                options:{
-                    limit:500000
-                }
-            }]
-        }]
+        rules: [
+            {
+                test: /\.css$/,
+                // use: ["style-loader", "css-loader"]
+                use: ExtractTextPlugin.extract({fallback: 'style-loader', use: 'css-loader'})
+            }, {
+                test: /\.(png|jpg|gif)/,
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: 500000
+                        }
+                    }
+                ]
+            }
+        ]
     },
     //配置插件，用于生产模块和各项功能
     plugins: [
-        //压缩js插件
-        // new UglifyJsPlugin(),
-        //打包html文件
+        //压缩js插件 new UglifyJsPlugin(), 打包html文件
         new HtmlPlugin({
-            minify:{ //压缩html
+            minify: { //压缩html
                 //去掉属性的引号
-                removeAttributeQuotes:true
+                removeAttributeQuotes: true
             },
-            hash:true,//添加hash，避免缓存js
-            template:'./src/index.html'//配置模板路径
-        })
+            hash: true, //添加hash，避免缓存js
+            template: './src/index.html' //配置模板路径
+        }),
+        //css分离
+        new ExtractTextPlugin('/css/index.css')
     ],
     //配置webpack开发服务功能
     devServer: {
