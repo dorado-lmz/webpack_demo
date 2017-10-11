@@ -66,11 +66,14 @@
 /******/ ({
 
 /***/ 3:
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-document.getElementById('title').onclick = function(){
-    document.getElementById('title').style="color:green";
-}
+"use strict";
+
+
+document.getElementById('title').onclick = function () {
+    document.getElementById('title').style = "color:green";
+};
 
 /***/ })
 

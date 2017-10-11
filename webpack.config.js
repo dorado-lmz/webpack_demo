@@ -1,14 +1,17 @@
 const path = require('path');
 const webpack = require('webpack');
+const glob = require('glob');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const PurifyCssPlugin = require('purifycss-webpack');
 
 const website = {
     publicPath: 'http://localhost:1608/'
 }
 
 module.exports = {
+    // devtool:'source-map',
     //入口文件的配置项
     entry: {
         entry: './src/entery.js',
@@ -66,6 +69,14 @@ module.exports = {
             }, {
                 test: /\.(htm|html)/,
                 use: ["html-withimg-loader"]
+            }, {
+                test: /\.(js|jsx)$/,
+                use: [
+                    {
+                        loader: "babel-loader"
+                    }
+                ],
+                exclude: /node_modules/
             }
         ]
     },
@@ -81,7 +92,11 @@ module.exports = {
             template: './src/index.html' //配置模板路径
         }),
         //css分离
-        new ExtractTextPlugin('css/index.css')
+        new ExtractTextPlugin('css/index.css'),
+        //消除多余的css
+        new PurifyCssPlugin({
+            paths: glob.sync(path.join(__dirname, 'src/*.html'))
+        })
     ],
     //配置webpack开发服务功能
     devServer: {

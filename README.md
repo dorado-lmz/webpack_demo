@@ -222,6 +222,66 @@ webpack命令行使用基本方法：
 
 当 npm run server 启动后，服务器有一种监控机制（watch），可以实现热更新；
 
+## js压缩 ##
+
+webpack自带一个插件uglifyjs-webpack-plugin来压缩js，所以不需要再次安装，当一切都准备妥当，引入uglifyjs-webpack-plugin模块：
+
+    const uglify = require('uglifyjs-webpack-plugin');
+
+因为它是一个插件，所以把它放在plugins里：
+
+    plugins:[
+        new uglify()
+    ]
+
+这样就完事了，执行命令webpack，压缩文件就OK了，一般不会出现问题，（但是我在实际操作中报错了，uglifyjs-webpack-plugin没有找到，所以，如果你报错了，还是安装一下吧）
+
+    npm install uglifyjs-webpack-plugin --save-dev
+
+## 打包HTML文件 ##
+
+首先删除dist目录下的所有文件，然后在src文件下创建index.html文件，
+
+/src/index.html
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>webpack</title>
+    </head>
+    <body>
+        <div id="title"></div>
+    </body>
+    </html>
+
+配置webpack.config.js文件，安装html-webpack-plugin插件
+
+    npm install html-webpack-plugin --save-dev
+
+然后引入改插件：
+
+    const htmlPlugin =  require('html-webpack-plugin');
+
+在plugins下，加载htmlPlugin插件
+
+    plugins:[
+        new uglify(),
+        new htmlPlugin({
+            minify:{
+                removeAttributeQuotes:true
+            },
+            hash:true,
+            template:'./src/index.html'
+        })
+    ]
+
++ minify：是对html文件进行压缩， removeAttributeQuotes是去掉属性的双引号；
++ hash：为了开发中js有缓存效果，加入hash，可以有效避免js缓存；
++ template：需要打包的HTML模板路径和文件名称；
+
 ## Loaders ##
 
 Loaders是Webpack最重要的功能之一，他也是Webpack如此盛行的原因。通过使用不同的Loader，Webpack可以的脚本和工具，从而对不同的文件格式进行特定处理。
@@ -295,64 +355,121 @@ Loader的配置模型：
 
 这样我们就配置好了，使用命令webpack打包，就可以看的样式生效；
 
-## js压缩 ##
+## 分离CSS ##
 
-webpack自带一个插件uglifyjs-webpack-plugin来压缩js，所以不需要再次安装，当一切都准备妥当，引入uglifyjs-webpack-plugin模块：
+目前，打包后的文件中，css是打包在js代码里面的，这样不便于以后的维护，所以需要吧CSS从js中分离出来，我们需要使用插件[Extract Text Plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)
 
-    const uglify = require('uglifyjs-webpack-plugin');
+安装：
 
-因为它是一个插件，所以把它放在plugins里：
+    npm install --save-dev extract-text-webpack-plugin
 
-    plugins:[
-        new uglify()
-    ]
+在webpack.config.js中引入
 
-这样就完事了，执行命令webpack，压缩文件就OK了，一般不会出现问题，（但是我在实际操作中报错了，uglifyjs-webpack-plugin没有找到，所以，如果你报错了，还是安装一下吧）
+    const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-    npm install uglifyjs-webpack-plugin --save-dev
+在Plugins中配置:
 
-## 打包HTML文件 ##
+    new ExtractTextPlugin('css/index.css');
+    //css/index.css是分离后的路径位置
 
-首先删除dist目录下的所有文件，然后在src文件下创建index.html文件，
+修改Loader配置：
 
-/src/index.html
+    module:{
+        rules:[
+            {
+                test:/\.css$/,
+                use:ExtractTextPlugin.extract({
+                    fallback:"style-loader",
+                    use:"css-loader"
+                })
+            }
+        ]
+    }
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>webpack</title>
-    </head>
-    <body>
-        <div id="title"></div>
-    </body>
-    </html>
+## Less打包和分离 ##
 
-配置webpack.config.js文件，安装html-webpack-plugin插件
+Less作为目前很火的CSS预处理语言，它扩展了 CSS 语言，增加了变量、Mixin、函数等特性，使 CSS 更易维护和扩展；
 
-    npm install html-webpack-plugin --save-dev
+安装：
 
-然后引入改插件：
+    npm install --save-dev less less-loader
 
-    const htmlPlugin =  require('html-webpack-plugin');
+在webpack.config.js中配置Loader:
 
-在plugins下，加载htmlPlugin插件
+    module:{
+        rules:[
+            {
+                test:/\.less$/,
+                use:ExtractTextPlugin.extract({
+                    fallback:"style-loader",
+                    use:[{
+                        loader:"css-loader"
+                    },{
+                        loader:"less-loader"
+                    }]
+                })
+            }
+        ]
+    }
 
-    plugins:[
-        new uglify(),
-        new htmlPlugin({
-            minify:{
-                removeAttributeQuotes:true
-            },
-            hash:true,
-            template:'./src/index.html'
+## Sass打包和分离 ##
+
+Sass的打包和分离和less的类似，首先下载安装Sass所支持的服务与loader
+
+安装：
+
+    npm install --save-dev node-sass sass-loader
+
+在webpack.config.js中配置Loader:
+
+    module:{
+        rules:[
+            {
+                test:/\.less$/,
+                use:ExtractTextPlugin.extract({
+                    fallback:"style-loader",
+                    use:[{
+                        loader:"css-loader"
+                    },{
+                        loader:"sass-loader"
+                    }]
+                })
+            }
+        ]
+    }
+
+## css自动加载前缀 ##
+
+CSS3是目前作为一个前端必须要掌握的技能，但是由于现在好多浏览器还是不兼容CSS3，所以前端需要多写很丑很难看的前缀代码；以前都是边查Can I Use ，边添加，这样很麻烦，现在配置一个插件[postcss](https://github.com/postcss/postcss-loader)就可以搞定；
+
+PostCSS是一个CSS的处理平台，它可以帮助你的CSS实现更多的功能，但是今天我们就通过其中的一个加前缀的功能，初步了解一下PostCSS。
+
+安装：
+
+    npm install --save-dev postcss-loader autoprefixer
+
+在根目录下，建立一个postcss.config.js文件：
+
+    module.exports = {
+        plugins:[
+            require('autoprefixer')
+        ]
+    }
+
+这就是对postCSS一个简单的配置，引入了autoprefixer插件。让postCSS拥有添加前缀的能力，它会根据 can i use 来增加相应的css3属性前缀。
+
+在webpack.config.js中配置Loader:
+
+    {
+        test: /\.css$/,
+        use: extractTextPlugin.extract({
+            fallback: 'style-loader',
+            use: [
+                { loader: 'css-loader', 
+                    options: { importLoaders: 1 } 
+                },
+                'postcss-loader'
+            ]
         })
-    ]
 
-+ minify：是对html文件进行压缩， removeAttributeQuotes是去掉属性的双引号；
-+ hash：为了开发中js有缓存效果，加入hash，可以有效避免js缓存；
-+ template：需要打包的HTML模板路径和文件名称；
-
-## 图片处理 ##
+    }
