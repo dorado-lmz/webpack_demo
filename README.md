@@ -473,3 +473,30 @@ PostCSS是一个CSS的处理平台，它可以帮助你的CSS实现更多的功�
         })
 
     }
+
+## 消除多余CSS ##
+
+随着项目的进展，编写的CSS会越来越多，有时候需求更改，带来DOM结构的更改，造成CSS的冗余，所以为了减少CSS文件的体积，需要消除冗余的CSS；使用PurifyCSS可以大大减少CSS冗余；这个插件必须配合extract-text-webpack-plugin来使用；
+
+安装：
+
+    npm install --save-dev purifycss-webpack purify-css
+
+引入glob：
+
+因为需要同步检查HTML模板，所以需要引入node的glob对象使用，在webpack.config.js文件头部引入
+
+    const glob = require('glob');
+
+引入purifycss-webpack:
+
+    const PurifyCssPlugin = require('purifycss-webpack');
+
+配置plugins：
+
+    plugins:[
+        new PurifyCssPlugin({
+            paths:glob.sync(path.join(__dirname,'src/*.html'))
+        })
+    ]
+
