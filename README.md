@@ -500,3 +500,91 @@ PostCSS是一个CSS的处理平台，它可以帮助你的CSS实现更多的功�
         })
     ]
 
+## CSS中图片处理 ##
+
+在src目录下新建一个images目录，把图片放入images文件夹中；在index.html文件中增加一个div标签：
+
+/src/index.html:
+
+    <div id="image"></div>
+
+编写css,给刚刚增加的div标签添加背景图片：
+
+/src/css/index.css:
+
+    #image{
+        background: url('../images/webpack.jpg');
+        width: 497px;
+        height: 270px;
+    }
+
+安装loader:
+
+    npm install --save-dev file-loader url-loader
+
+
+在webpack.config.js中配置loader：
+
+    module:{
+        rules:[
+            {
+                test:/\.(png|jpg|gif)$/,
+                use:[{
+                    loader:'url-loader',
+                    options:{
+                        limit:500000，
+                        outputPath:'images/'
+                    }
+                }]
+            }
+        ]
+    }
+
+## url-loader与file-loader ##
+
+file-loader：解决引用路径的问题；
+
+url-loader：如果图片较多，会发很多http请求，降低页面性能，url-loader将引入的图片编码，生成dataURL；url-loader会提供一个limit参数（单位B），小于limit字节的图片会被转为dataURL，大于limit的会使用file-loader进行copy；outputPath是图片分离后的路径；
+
+简单说两者关系，url-loader封装了file-loader，url-loader不依赖file-loader，即使用url-loader时，只需要安装url-loader即可，不需要安装file-loader；
+
+## CSS中图片路径处理 ##
+
+利用extract-text-webpack-plugin插件将CSS文件分离出来，但是CSS里的图片路径并不正确，这里使用publicPath解决；
+
+publicPath是在webpack.config.js文件的output选项中，主要作用是处理静态文件路径的；
+
+声明一个website对象：
+
+    const website = {
+        publicPath:'http://localhost:1608/'
+    }
+
+这里的IP和端口，必须和devServer配置的IP和端口一致。
+
+配置output选择：
+
+    output:{
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js',
+        publicPath: website.publicPath
+    }
+
+## HTML中图片处理 ##
+
+在webpack中是不喜欢你使用标签\<img\>来引入图片的，但是作前端特别热衷于这种写法，国人也为此开发了一个：html-withimg-loader。他可以很好的处理我们在html 中引入图片的问题。
+
+安装loader：
+
+    npm install --save-dev html-withimg-loader
+
+在webpack.config.js中配置loader:
+
+    module:{
+        rules:[
+            {
+                test:/\.(htm|html)$/,
+                use:["html-withimg-loader"]
+            }
+        ]
+    }
