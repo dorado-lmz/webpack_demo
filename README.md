@@ -354,3 +354,5 @@ webpack自带一个插件uglifyjs-webpack-plugin来压缩js，所以不需要再
 + minify：是对html文件进行压缩， removeAttributeQuotes是去掉属性的双引号；
 + hash：为了开发中js有缓存效果，加入hash，可以有效避免js缓存；
 + template：需要打包的HTML模板路径和文件名称；
+
+## 图片处理 ##

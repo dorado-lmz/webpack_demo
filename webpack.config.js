@@ -5,7 +5,7 @@ const HtmlPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const website = {
-    publicPath:'http://localhost:1608/'
+    publicPath: 'http://localhost:1608/'
 }
 
 module.exports = {
@@ -18,8 +18,9 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         // filename:'bundle.js'
-        filename: '[name].js'
-        // public
+        filename: '[name].js',
+        // publicPath
+        publicPath: website.publicPath
     },
     //模块，主要是解读css和图片转换压缩等功能
     module: {
@@ -27,17 +28,44 @@ module.exports = {
             {
                 test: /\.css$/,
                 // use: ["style-loader", "css-loader"]
-                use: ExtractTextPlugin.extract({fallback: 'style-loader', use: 'css-loader'})
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: [
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                importLoaders: 1
+                            }
+                        },
+                        'postcss-loader'
+                    ]
+                })
+            }, {
+                test: /\.less$/,
+                use: ExtractTextPlugin.extract({
+                    use: [
+                        {
+                            loader: 'css-loader'
+                        }, {
+                            loader: 'less-loader'
+                        }
+                    ],
+                    fallback: 'style-loader'
+                })
             }, {
                 test: /\.(png|jpg|gif)/,
                 use: [
                     {
                         loader: 'url-loader',
                         options: {
-                            limit: 500000
+                            limit: 5000, //图片大小，单位B
+                            outputPath: 'images/' //图片输出路径
                         }
                     }
                 ]
+            }, {
+                test: /\.(htm|html)/,
+                use: ["html-withimg-loader"]
             }
         ]
     },
@@ -53,7 +81,7 @@ module.exports = {
             template: './src/index.html' //配置模板路径
         }),
         //css分离
-        new ExtractTextPlugin('/css/index.css')
+        new ExtractTextPlugin('css/index.css')
     ],
     //配置webpack开发服务功能
     devServer: {
