@@ -588,3 +588,44 @@ publicPath是在webpack.config.js文件的output选项中，主要作用是处�
             }
         ]
     }
+
+## Babel是什么 ##
+
+Babel是一个编译JavaScript的平台，它的强大之处表现在可以通过编译帮你达到：
+
++ 使用下一代的javascript（ES6，ES7,……）代码，即使当前浏览器没有完成支持；
++ 使用基于JavvScript进行扩展语言，比如React的JSX；
+
+## webpack配置Babel ##
+
+安装依赖包：
+
+    npm install --save-dev babel-core babel-loader babel-preset-react babel-preset-env
+
++ babel-core：babel的核心包；
++ babel-loader：babel的loader包；
++ babel-preset-es2015：解析es6的包；
++ babel-preset-env：解析es6的包；（官方最新推荐）
++ babel-preset-react：解析React的JSX的包；
+
+在webpack.config.js中配置babel:
+
+    module:{
+        rules:[
+            {
+                test:'/\.(js|jsx)$/',
+                use:{
+                    loader:'babel-loader'
+                },
+                exclude:/node_module/
+            }
+        ]
+    }
+
+在根目录下建立.babelrc文件，虽然Babel可以直接在webpack.config.js中进行配置，但是考虑到babel具有非常多的配置选项，如果卸载webapck.config.js中会非常的雍长不可阅读，所以我们经常把配置卸载.babelrc文件里。
+
+.babelrc
+
+    {
+        "presets":["env","react"]
+    }
