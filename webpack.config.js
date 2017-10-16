@@ -6,17 +6,19 @@ const HtmlPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const PurifyCssPlugin = require('purifycss-webpack');
 
-const website = {
-    publicPath: 'http://localhost:1608/'
+const entry = require('./config/entry.config.js');
+
+const website= {};
+if(process.env.type == 'build'){
+    website.publicPath = "http://hawkzz.com:1608/";
+}else{
+    website.publicPath = 'http://localhost:1608/';
 }
 
 module.exports = {
     // devtool:'source-map',
     //入口文件的配置项
-    entry: {
-        entry: './src/entery.js',
-        entry2: './src/entery2.js'
-    },
+    entry: entry.path,
     //出口文件的配置项
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -96,6 +98,10 @@ module.exports = {
         //消除多余的css
         new PurifyCssPlugin({
             paths: glob.sync(path.join(__dirname, 'src/*.html'))
+        }),
+        //引入外部js库，如：JQuery
+        new webpack.ProvidePlugin({
+            $:'jquery'
         })
     ],
     //配置webpack开发服务功能

@@ -4,8 +4,9 @@
     "description": "webpack 3.0 demo",
     "main": "index.js",
     "scripts": {
-        "server": "webpack-dev-server",
-        "build": "webpack"
+        "server": "webpack-dev-server --open",
+        "build": "set type=build&webpack",
+        "dev": "set type=dev&webpack"
     },
     "repository": {
         "type": "git",
@@ -40,5 +41,7 @@
         "webpack": "^3.6.0",
         "webpack-dev-server": "^2.8.2"
     },
-    "dependencies": {}
+    "dependencies": {
+        "jquery": "^3.2.1"
+    }
 }
