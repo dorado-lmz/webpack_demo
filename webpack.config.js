@@ -5,6 +5,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const PurifyCssPlugin = require('purifycss-webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const entry = require('./config/entry.config.js');
 
@@ -23,7 +24,7 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         // filename:'bundle.js'
-        filename: '[name].js',
+        filename: 'js/[name].js',
         // publicPath
         publicPath: website.publicPath
     },
@@ -102,7 +103,17 @@ module.exports = {
         //引入外部js库，如：JQuery
         new webpack.ProvidePlugin({
             $:'jquery'
-        })
+        }),
+        new webpack.BannerPlugin('ZhouZhuang版权所有'),
+        new webpack.optimize.CommonsChunkPlugin({
+            name:['jquery'],
+            filename:'assets/js/[name].js',
+            minChunks:2
+        }),
+        // new CopyPlugin([{
+        //     from:__dirname+'/src/assets',
+        //     to:'./public'
+        // }])
     ],
     //配置webpack开发服务功能
     devServer: {
@@ -114,5 +125,12 @@ module.exports = {
         compress: true,
         //配置服务器的端口
         port: 1608
+    },
+    watchOptions:{
+        //检测修改的时间，单位毫秒
+        poll:1000,
+        //防止重复保存的时间，单位毫秒
+        aggregeateTimeout:500,
+        ignored:/node_modules/
     }
 }
