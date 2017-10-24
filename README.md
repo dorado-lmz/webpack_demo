@@ -1,5 +1,9 @@
 # webpack3.0学习 #
 
+## 博客地址 ##
+
+<http://blog.hawkzz.com>
+
 ## webpack是什么 ##
 
 webpack可以看做是模块打包机：它做的事情是，分析你的项目结构，找到JavaScript模块以及其它的一些浏览器不能直接运行的拓展语言（Sass，TypeScript等），并将其转换和打包为合适的格式供浏览器使用。在3.0出现后，Webpack还肩负起了优化项目的责任。
