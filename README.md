@@ -629,3 +629,103 @@ Babel是一个编译JavaScript的平台，它的强大之处表现在可以通�
     {
         "presets":["env","react"]
     }
+
+## 打包第三方类库 ##
+
+在工作中引入第三方的类库是在所难免的，比如引入JQuery；那么如何引入呢？下面我们来说说：
+
+首先我们安装第三方类库，这里用jquery为例子：
+
+    npm install jquery --save
+
+要注意的是这里我们使用“--save”来安装模块，因为引入的第三方类库肯定是需要在生产环境要用；
+
+第二步，就是要引入第三方类库了，这里有两种方法来引入：
+
+第一种，在/src/entery.js（即入口文件）中，直接引入jquery:
+
+/src/entery.js
+
+    import $ from 'jquery';
+
+一行简单的import命令就ok了；
+
+第二种，就是在webpack配置文件中，全局引入jquery：
+
+/webpack.config.js
+
+    plugins:[
+        new webpack.ProvidePlugin({
+            $:'jquery'
+        })
+    ]
+
+通过webpack自带的插件ProvidePlugin；
+
+两种方法的区别：
+
++ import引入方法：引用后不管你在代码中使用不适用该类库，都会把该类库打包起来，这样有时就会让代码产生冗余。
++ ProvidePlugin引入方法：引用后只有在类库使用时，才按需进行打包，所以建议在工作使用插件的方式进行引入。
+
+## 抽离第三方类库 ##
+
+上面说到如何引入和打包第三方类库，通过上面的方法有一个问题，那就是将第三方类库全部打包到/src/entery.js中，增加了文件的大小，和复杂度；因此，我们需要抽离第三方类库：
+
+首先，修改入口文件：
+
+/webpack.config.js
+
+    entry:{
+        entry:'./src/entery.js',
+        jquery:'jquery'
+    }
+
+接着，使用optimize优化插件
+
+    plugins:[
+        new webpack.optimize.CommonsChunkPlugin({
+            name:['jqury'],
+            filename:'assets/js/[name].js',
+            minChunks:2
+        })
+    ]
+
++ name ：对应入口文件的名字；
++ filename ： 文件抽离后的路径；
++ minChunks ： 固定配置，必写；
+
+## 静态资源打包 ##
+
+在工作中可能会有一些在项目中没有引用的图片资源或者是其他静态资源，但是又必须留着，这时我们就需要处理这些静态资源；
+
+下载安装插件copy-webpack-plugin
+
+    npm install --save-dev copy-webpack-plugin
+
+配置webpack.config.js文件：
+
+    const CopyPlugin = require('copy-webpack-plugin');
+        ...
+    plugins:[
+        new CopyPlugin([{
+            from:__dirname + '/src/public',
+            to:'./public'
+        }])
+    ]
+
++ from：要打包的静态资源源目录地址
++ to：要打包到的文件夹路径
+
+## watch的配置 ##
+
+/webpack.config.js
+
+    watchOptions:{
+        poll:1000,
+        aggregateTimeout:500,
+        ignored:/node_module/
+    }
+
++ poll：检测修改的时间，单位毫秒
++ aggregateTimeout：防止重复保存的时间，单位毫秒
++ ignored：忽略的目录

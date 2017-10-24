@@ -110,10 +110,10 @@ module.exports = {
             filename:'assets/js/[name].js',
             minChunks:2
         }),
-        // new CopyPlugin([{
-        //     from:__dirname+'/src/assets',
-        //     to:'./public'
-        // }])
+        new CopyPlugin([{
+            from:__dirname+'/src/public',
+            to:'./public'
+        }])
     ],
     //配置webpack开发服务功能
     devServer: {
@@ -130,7 +130,7 @@ module.exports = {
         //检测修改的时间，单位毫秒
         poll:1000,
         //防止重复保存的时间，单位毫秒
-        aggregeateTimeout:500,
+        aggregateTimeout:500,
         ignored:/node_modules/
     }
 }
