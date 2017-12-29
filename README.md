@@ -733,3 +733,114 @@ Babel是一个编译JavaScript的平台，它的强大之处表现在可以通�
 + poll：检测修改的时间，单位毫秒
 + aggregateTimeout：防止重复保存的时间，单位毫秒
 + ignored：忽略的目录
+
+## 如何打包多页面 ##
+
+在学了webpack之后，我的感受是我会配置webpack了，也能运行了，但是学习的过程中都是单页面的，那么多页是如何打包的呢？其实多页面的打包和单页面的打包的原理是一样的，只是多配置几个对应的入口，和出口，以及HtmlWebpackPlugin对象；当然你完全可以像下面这样：
+
+    const config = {
+        entry:{
+            index:'./src/index.js'，
+            info:'./src/index.js'
+        },
+        output:{
+            path: path.join(__dirname, 'dist'),
+            filename: 'js/[name].js'
+        }
+        ...
+        plugins:[
+            new HtmlWebpackPlugin({
+                filename: 'index.html',
+                template: './src/index.html',
+                chunks:['index'],
+                hash: true,
+                minify: {
+                    removeAttributeQuotes:true,
+                    removeComments: true,
+                    collapseWhitespace: true,
+                    removeScriptTypeAttributes:true,
+                    removeStyleLinkTypeAttributes:true
+                }
+            }),
+            new HtmlWebpackPlugin({
+                filename: 'info.html',
+                template: './src/info.html',
+                hash: true,
+                chunks:['info'],
+                minify: {
+                    removeAttributeQuotes:true,
+                    removeComments: true,
+                    collapseWhitespace: true,
+                    removeScriptTypeAttributes:true,
+                    removeStyleLinkTypeAttributes:true
+                }
+            })
+        ]
+    }
+
+细心的你肯定发现我改变了几个地方，一是,把output.filename的‘js/index.js’变成了‘js/[name].js’,这是因为我们是多页面，每个页面对应相应的js这样方便管理，二是，在HtmlWebpackPlugin对象中添加了chunks这个属性，chunk属性是让你选择对应的js模块；
+
+上面这种写法当然是没有问题，这是只有两个页面无所谓，那么有十个甚至更多呢，我们一直做着重复的事，这不是我们程序员的风格，我们就是为了能够偷懒才做程序员的不是吗?(当然还有高工资(#^.^#))，接下来我们来抽离这些重复的事；
+
+首先，我们通过Node的glob对象，来获取我们存在的html或js；
+
+    /**
+    *
+    * @param {string}  globPath  文件的路径
+    * @returns entries
+    */
+    function getView(globPath,flag){
+        let files = glob.sync(globPath);
+
+        let entries = {},
+        entry, dirname, basename, pathname, extname;
+
+        files.forEach(item => {
+            entry = item;
+            dirname = path.dirname(entry);//当前目录
+            extname = path.extname(entry);//后缀
+            basename = path.basename(entry, extname);//文件名
+            pathname = path.join(dirname, basename);//文件路径
+            if (extname === '.html') {
+                entries[pathname] = './' + entry;
+            } else if (extname === '.js') {
+                entries[basename] = entry;
+            }
+        });
+
+        return entries;
+    }
+
+既然，我们已经有了getView()函数，可以获取html和js文件，那么我们就可以确定有多少个入口，和多少个页面;
+
+    let entriesObj = getView('./src/js/*.js');
+
+    let config = {
+        entry:entriesObj,
+        ...
+    }
+
+上面我们就配置好了入口，不需要我们手动添加了，有多少js就有多少入口；
+
+    let pages = Object.keys(getView('./src/*html'));
+
+    pages.forEach(pathname => {
+        let htmlname = pathname.split('src\\')[1];
+        let conf = {
+            filename: `${htmlname}.html`,
+            template: `${pathname}.html`,
+            hash: true,
+            chunks:[htmlname],
+            minify: {
+                removeAttributeQuotes:true,
+                removeComments: true,
+                collapseWhitespace: true,
+                removeScriptTypeAttributes:true,
+                removeStyleLinkTypeAttributes:true
+            }
+        }
+
+        config.plugins.push(new HtmlWebpackPlugin(conf));
+    });
+
+最后，我们获取HTML页面，和添加对应页面的HTMLWebpackPlugin对象；
