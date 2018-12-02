@@ -6,6 +6,7 @@ const HtmlPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const PurifyCssPlugin = require('purifycss-webpack');
 const CopyPlugin = require('copy-webpack-plugin');
+const HappyPack = require('happypack');
 
 const entry = require('./config/entry.config.js');
 
@@ -15,6 +16,14 @@ if(process.env.type == 'build'){
 }else{
     website.publicPath = 'http://localhost:1608/';
 }
+let threadPool = HappyPack.ThreadPool({
+    size: 4
+})
+
+const happyLoaderList = {
+    css: ['style', 'css'],
+    babel: 'babel'
+};
 
 module.exports = {
     // devtool:'source-map',
@@ -33,16 +42,31 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: ["style-loader", "css-loader"]
+                // use: ["style-loader", "css-loader"]
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: [
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                importLoaders: 1
+                            }
+                        },
+                        'postcss-loader'
+                    ]
+                })
             }, {
                 test: /\.less$/,
-                use: [
-                    {
-                        loader: 'css-loader'
-                    }, {
-                        loader: 'less-loader'
-                    }
-                ]
+                use: ExtractTextPlugin.extract({
+                    use: [
+                        {
+                            loader: 'css-loader'
+                        }, {
+                            loader: 'less-loader'
+                        }
+                    ],
+                    fallback: 'style-loader'
+                })
             }, {
                 test: /\.(png|jpg|gif)/,
                 use: [
@@ -60,9 +84,8 @@ module.exports = {
             }, {
                 test: /\.(js|jsx)$/,
                 use: [
-                    "thread-loader",
                     {
-                        loader: "babel-loader"
+                        loader: getLoader('babel')
                     }
                 ],
                 exclude: /node_modules/
@@ -71,6 +94,18 @@ module.exports = {
     },
     //配置插件，用于生产模块和各项功能
     plugins: [
+        ... Object.keys(happyLoaderList).map((id) => {
+            let loader = getLoader(id);
+        
+            return new HappyPack({
+                id,
+                loaders: [loader],
+                threadPool,
+                verbose: true,
+                debug: true
+            })
+
+        }),
         //压缩js插件 new UglifyJsPlugin(), 打包html文件
         new HtmlPlugin({
             minify: { //压缩html
@@ -81,7 +116,7 @@ module.exports = {
             template: './src/index.html' //配置模板路径
         }),
         //css分离
-        // new ExtractTextPlugin('css/index.css'),
+        new ExtractTextPlugin('css/index.css'),
         //消除多余的css
         new PurifyCssPlugin({
             paths: glob.sync(path.join(__dirname, 'src/*.html'))
@@ -95,10 +130,6 @@ module.exports = {
             name:['jquery'],
             filename:'assets/js/[name].js',
             minChunks:2
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'runtime',
-            minChunks: Infinity
         }),
         new CopyPlugin([{
             from:__dirname+'/src/public',
@@ -123,4 +154,8 @@ module.exports = {
         aggregateTimeout:500,
         ignored:/node_modules/
     }
+}
+
+function getLoader(type) {
+    return `happypack/loader?id=${type}`;
 }

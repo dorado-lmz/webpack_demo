@@ -33,16 +33,31 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: ["style-loader", "css-loader"]
+                // use: ["style-loader", "css-loader"]
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: [
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                importLoaders: 1
+                            }
+                        },
+                        'postcss-loader'
+                    ]
+                })
             }, {
                 test: /\.less$/,
-                use: [
-                    {
-                        loader: 'css-loader'
-                    }, {
-                        loader: 'less-loader'
-                    }
-                ]
+                use: ExtractTextPlugin.extract({
+                    use: [
+                        {
+                            loader: 'css-loader'
+                        }, {
+                            loader: 'less-loader'
+                        }
+                    ],
+                    fallback: 'style-loader'
+                })
             }, {
                 test: /\.(png|jpg|gif)/,
                 use: [
@@ -81,7 +96,7 @@ module.exports = {
             template: './src/index.html' //配置模板路径
         }),
         //css分离
-        // new ExtractTextPlugin('css/index.css'),
+        new ExtractTextPlugin('css/index.css'),
         //消除多余的css
         new PurifyCssPlugin({
             paths: glob.sync(path.join(__dirname, 'src/*.html'))
@@ -95,10 +110,6 @@ module.exports = {
             name:['jquery'],
             filename:'assets/js/[name].js',
             minChunks:2
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'runtime',
-            minChunks: Infinity
         }),
         new CopyPlugin([{
             from:__dirname+'/src/public',
